@@ -3,19 +3,30 @@ package com.nplexity.android.sawmill;
 import java.util.ArrayList;
 
 public class Sawmill {
-    private static final ArrayList<LoggerNode> LOGGERS = new ArrayList<>();
-    private static LogLevel sHighestLogLevel = LogLevel.NONE;
+    public static final int LOG_FLAG_ERROR = 1;
+    public static final int LOG_FLAG_WARNING = 1 << 1;
+    public static final int LOG_FLAG_INFO = 1 << 2;
+    public static final int LOG_FLAG_DEBUG = 1 << 3;
+    public static final int LOG_FLAG_VERBOSE = 1 << 4;
+    public static final int LOG_FLAG_TRACE = 1 << 5;
 
-    static LogLevel getHighestLogLevel() {
+    public static final int LOG_LEVEL_NONE = 0;
+    public static final int LOG_LEVEL_ERROR = LOG_FLAG_ERROR;
+    public static final int LOG_LEVEL_WARNING = LOG_LEVEL_ERROR | LOG_FLAG_WARNING;
+    public static final int LOG_LEVEL_INFO = LOG_LEVEL_WARNING | LOG_FLAG_INFO;
+    public static final int LOG_LEVEL_DEBUG = LOG_LEVEL_INFO | LOG_FLAG_DEBUG;
+    public static final int LOG_LEVEL_VERBOSE = LOG_LEVEL_DEBUG | LOG_FLAG_VERBOSE;
+    public static final int LOG_LEVEL_ALL = Integer.MAX_VALUE;
+
+    private static final ArrayList<LoggerNode> LOGGERS = new ArrayList<>();
+    private static int sHighestLogLevel = LOG_LEVEL_NONE;
+
+    static int getHighestLogLevel() {
         return sHighestLogLevel;
     }
 
     public static void addLogger(Logger logger) {
-        addLogger(logger, LogLevel.ALL);
-    }
-
-    public static void addLogger(Logger logger, LogLevel level) {
-        addLogger(logger, level.getLevelValue());
+        addLogger(logger, LOG_LEVEL_ALL);
     }
 
     public static void addLogger(Logger logger, int bitmask) {
@@ -23,9 +34,9 @@ public class Sawmill {
             return;
         }
 
-        //        if (level > sHighestLogLevel) {
-        //            sHighestLogLevel = level;
-        //        }
+        if (bitmask > sHighestLogLevel) {
+            sHighestLogLevel = bitmask;
+        }
 
         LoggerNode node = new LoggerNode(logger, bitmask);
         LOGGERS.add(node);
@@ -40,51 +51,20 @@ public class Sawmill {
             }
         }
 
-        return LOGGERS.remove(nodeToRemove);
-    }
-
-    public enum LogLevel {
-        NONE(0),
-        ERROR(LogFlag.ERROR.getFlagValue()),
-        WARNING(ERROR.getLevelValue() | LogFlag.WARNING.getFlagValue()),
-        INFO(WARNING.getLevelValue() | LogFlag.INFO.getFlagValue()),
-        DEBUG(INFO.getLevelValue() | LogFlag.DEBUG.getFlagValue()),
-        VERBOSE(DEBUG.getLevelValue() | LogFlag.VERBOSE.getFlagValue()),
-        ALL(Integer.MAX_VALUE);
-
-        private final int mLevelValue;
-
-        LogLevel(int level) {
-            mLevelValue = level;
+        boolean found = LOGGERS.remove(nodeToRemove);
+        if (found) {
+            sHighestLogLevel = LOG_LEVEL_NONE;
+            for (LoggerNode node : LOGGERS) {
+                sHighestLogLevel = Math.max(node.getLogLevel(), sHighestLogLevel);
+            }
         }
 
-        public int getLevelValue() {
-            return mLevelValue;
-        }
-    }
-
-    public enum LogFlag {
-        ERROR(1),
-        WARNING(1 << 1),
-        INFO(1 << 2),
-        DEBUG(1 << 3),
-        VERBOSE(1 << 4),
-        TRACE(1 << 5);
-
-        private final int mFlagValue;
-
-        LogFlag(int flag) {
-            mFlagValue = flag;
-        }
-
-        public int getFlagValue() {
-            return mFlagValue;
-        }
+        return false;
     }
 
     static void log(LogMessage message) {
         for (LoggerNode node : LOGGERS) {
-            if ((message.getFlag().getFlagValue() & node.getLogLevel()) > 0) {
+            if ((message.getFlag() & node.getLogLevel()) > 0) {
                 node.getLogger().logMessage(message);
             }
         }

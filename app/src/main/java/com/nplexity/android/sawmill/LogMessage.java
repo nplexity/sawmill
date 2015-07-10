@@ -3,7 +3,7 @@ package com.nplexity.android.sawmill;
 public class LogMessage {
     private final String mTag;
     private final String mMessage;
-    private final Sawmill.LogFlag mFlag;
+    private final int mFlag;
     private final long mTimestamp = System.currentTimeMillis();
 
     private LogMessage(Builder builder) {
@@ -15,7 +15,7 @@ public class LogMessage {
     public static class Builder {
         private String tag = "";
         private String message = "";
-        private Sawmill.LogFlag flag = Sawmill.LogFlag.VERBOSE;
+        private int flag = Sawmill.LOG_FLAG_VERBOSE;
 
         public Builder(String message) {
             this.message = message;
@@ -26,7 +26,7 @@ public class LogMessage {
             return this;
         }
 
-        public Builder flag(Sawmill.LogFlag flag) {
+        public Builder flag(int flag) {
             this.flag = flag;
             return this;
         }
@@ -44,7 +44,7 @@ public class LogMessage {
         return mMessage;
     }
 
-    public Sawmill.LogFlag getFlag() {
+    public int getFlag() {
         return mFlag;
     }
 
