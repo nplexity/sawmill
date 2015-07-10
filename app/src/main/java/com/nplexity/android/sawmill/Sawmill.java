@@ -68,9 +68,11 @@ public class Sawmill {
         }
     }
 
-    void log(LogMessage message) {
+    static void log(LogMessage message) {
         for (LoggerNode node : LOGGERS) {
-            node.getLogger().logMessage(message);
+            if ((message.getFlag().getFlagValue() & node.getLogLevel()) > 0) {
+                node.getLogger().logMessage(message);
+            }
         }
     }
 }
