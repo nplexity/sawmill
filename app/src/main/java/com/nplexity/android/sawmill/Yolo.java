@@ -3,6 +3,6 @@ package com.nplexity.android.sawmill;
 
 public class Yolo {
     public Yolo() {
-        Sawmill.addLogger(null, Sawmill.LogLevel.ALL | Sawmill.LogLevel.DEBUG);
+        Sawmill.addLogger(null, Sawmill.LOG_LEVEL_DEBUG | Sawmill.LOG_FLAG_TRACE);
     }
 }
