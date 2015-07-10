@@ -4,17 +4,30 @@ import java.util.ArrayList;
 
 public class Sawmill {
     private static final ArrayList<LoggerNode> LOGGERS = new ArrayList<>();
+    private static LogLevel sHighestLogLevel = LogLevel.NONE;
+
+    static LogLevel getHighestLogLevel() {
+        return sHighestLogLevel;
+    }
 
     public static void addLogger(Logger logger) {
         addLogger(logger, LogLevel.ALL);
     }
 
     public static void addLogger(Logger logger, LogLevel level) {
+        addLogger(logger, level.getLevelValue());
+    }
+
+    public static void addLogger(Logger logger, int bitmask) {
         if (logger == null) {
             return;
         }
 
-        LoggerNode node = new LoggerNode(logger, level.getLevelValue());
+        //        if (level > sHighestLogLevel) {
+        //            sHighestLogLevel = level;
+        //        }
+
+        LoggerNode node = new LoggerNode(logger, bitmask);
         LOGGERS.add(node);
     }
 
@@ -31,6 +44,7 @@ public class Sawmill {
     }
 
     public enum LogLevel {
+        NONE(0),
         ERROR(LogFlag.ERROR.getFlagValue()),
         WARNING(ERROR.getLevelValue() | LogFlag.WARNING.getFlagValue()),
         INFO(WARNING.getLevelValue() | LogFlag.INFO.getFlagValue()),
