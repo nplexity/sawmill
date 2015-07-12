@@ -1,44 +1,68 @@
 package com.nplexity.android.sawmill;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 public class Sawmill {
-    public static final int LOG_FLAG_ERROR = 1;
-    public static final int LOG_FLAG_WARNING = 1 << 1;
-    public static final int LOG_FLAG_INFO = 1 << 2;
-    public static final int LOG_FLAG_DEBUG = 1 << 3;
-    public static final int LOG_FLAG_VERBOSE = 1 << 4;
-    public static final int LOG_FLAG_TRACE = 1 << 5;
 
-    public static final int LOG_LEVEL_NONE = 0;
-    public static final int LOG_LEVEL_ERROR = LOG_FLAG_ERROR;
-    public static final int LOG_LEVEL_WARNING = LOG_LEVEL_ERROR | LOG_FLAG_WARNING;
-    public static final int LOG_LEVEL_INFO = LOG_LEVEL_WARNING | LOG_FLAG_INFO;
-    public static final int LOG_LEVEL_DEBUG = LOG_LEVEL_INFO | LOG_FLAG_DEBUG;
-    public static final int LOG_LEVEL_VERBOSE = LOG_LEVEL_DEBUG | LOG_FLAG_VERBOSE;
-    public static final int LOG_LEVEL_ALL = Integer.MAX_VALUE;
+    public enum LogFlag {
+        ERROR,
+        WARNING,
+        INFO,
+        DEBUG,
+        VERBOSE,
+        TRACE
+    }
+
+    public enum LogLevel {
+        NONE(EnumSet.noneOf(LogFlag.class)),
+        ERROR(EnumSet.of(LogFlag.ERROR)),
+        WARNING(EnumSet.of(LogFlag.ERROR, LogFlag.WARNING)),
+        INFO(EnumSet.range(LogFlag.ERROR, LogFlag.INFO)),
+        DEBUG(EnumSet.range(LogFlag.ERROR, LogFlag.DEBUG)),
+        VERBOSE(EnumSet.range(LogFlag.ERROR, LogFlag.VERBOSE)),
+        ALL(EnumSet.allOf(LogFlag.class));
+
+        private final EnumSet<LogFlag> mFlags;
+
+        LogLevel(EnumSet<LogFlag> flags) {
+            mFlags = flags;
+        }
+
+        EnumSet<LogFlag> getFlags() {
+            return mFlags;
+        }
+
+        public EnumSet<LogFlag> and(LogFlag flag) {
+            EnumSet<LogFlag> flags = EnumSet.copyOf(mFlags);
+            flags.add(flag);
+            return flags;
+        }
+    }
 
     private static final ArrayList<LoggerNode> LOGGERS = new ArrayList<>();
-    private static int sHighestLogLevel = LOG_LEVEL_NONE;
+    private static EnumSet<LogFlag> sActiveFlags = EnumSet.copyOf(LogLevel.NONE.getFlags());
 
-    static int getHighestLogLevel() {
-        return sHighestLogLevel;
+    static EnumSet<LogFlag> getActiveFlags() {
+        return sActiveFlags;
     }
 
     public static void addLogger(Logger logger) {
-        addLogger(logger, LOG_LEVEL_ALL);
+        addLogger(logger, LogLevel.ALL);
     }
 
-    public static void addLogger(Logger logger, int bitmask) {
+    public static void addLogger(Logger logger, LogLevel level) {
+        addLogger(logger, level.getFlags());
+    }
+
+    public static void addLogger(Logger logger, EnumSet<LogFlag> logFlags) {
         if (logger == null) {
             return;
         }
 
-        if (bitmask > sHighestLogLevel) {
-            sHighestLogLevel = bitmask;
-        }
+        sActiveFlags.addAll(logFlags);
 
-        LoggerNode node = new LoggerNode(logger, bitmask);
+        LoggerNode node = new LoggerNode(logger, logFlags);
         LOGGERS.add(node);
     }
 
@@ -53,18 +77,15 @@ public class Sawmill {
 
         boolean found = LOGGERS.remove(nodeToRemove);
         if (found) {
-            sHighestLogLevel = LOG_LEVEL_NONE;
-            for (LoggerNode node : LOGGERS) {
-                sHighestLogLevel = Math.max(node.getLogLevel(), sHighestLogLevel);
-            }
+            // TODO: remove the flags associated with this logger
         }
 
-        return false;
+        return found;
     }
 
     static void log(LogMessage message) {
         for (LoggerNode node : LOGGERS) {
-            if ((message.getFlag() & node.getLogLevel()) > 0) {
+            if (node.getLogFlags().contains(message.getFlag())) {
                 node.getLogger().logMessage(message);
             }
         }

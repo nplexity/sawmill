@@ -2,48 +2,48 @@ package com.nplexity.android.sawmill;
 
 public class Log {
     public static <T> void error(T... args) {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_ERROR) > 0) {
-            LogMessage message = generateMessage(Sawmill.LOG_FLAG_ERROR, args);
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.ERROR)) {
+            LogMessage message = generateMessage(Sawmill.LogFlag.ERROR, args);
             Sawmill.log(message);
         }
     }
 
     public static <T> void warning(T... args) {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_WARNING) > 0) {
-            LogMessage message = generateMessage(Sawmill.LOG_FLAG_WARNING, args);
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.WARNING)) {
+            LogMessage message = generateMessage(Sawmill.LogFlag.WARNING, args);
             Sawmill.log(message);
         }
     }
 
     public static <T> void info(T... args) {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_INFO) > 0) {
-            LogMessage message = generateMessage(Sawmill.LOG_FLAG_INFO, args);
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.INFO)) {
+            LogMessage message = generateMessage(Sawmill.LogFlag.INFO, args);
             Sawmill.log(message);
         }
     }
 
     public static <T> void debug(T... args) {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_DEBUG) > 0) {
-            LogMessage message = generateMessage(Sawmill.LOG_FLAG_DEBUG, args);
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.DEBUG)) {
+            LogMessage message = generateMessage(Sawmill.LogFlag.DEBUG, args);
             Sawmill.log(message);
         }
     }
 
     public static <T> void verbose(T... args) {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_VERBOSE) > 0) {
-            LogMessage message = generateMessage(Sawmill.LOG_FLAG_VERBOSE, args);
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.VERBOSE)) {
+            LogMessage message = generateMessage(Sawmill.LogFlag.VERBOSE, args);
             Sawmill.log(message);
         }
     }
 
     public static void trace() {
-        if ((Sawmill.getHighestLogLevel() & Sawmill.LOG_FLAG_TRACE) > 0) {
+        if (Sawmill.getActiveFlags().contains(Sawmill.LogFlag.TRACE)) {
             LogMessage message = generateTracerMessage();
             Sawmill.log(message);
         }
     }
 
-    private static <T> LogMessage generateMessage(int flag, T... args) {
+    private static <T> LogMessage generateMessage(Sawmill.LogFlag flag, T... args) {
         final StackTraceElement[] elements = new Throwable().getStackTrace();
         String className = elements[2].getClassName();
         String methodName = elements[2].getMethodName();
@@ -65,6 +65,6 @@ public class Log {
 
         String message = "[" + methodName + ":" + lineNumber + "]";
 
-        return new LogMessage.Builder(message).flag(Sawmill.LOG_FLAG_TRACE).tag(className).build();
+        return new LogMessage.Builder(message).flag(Sawmill.LogFlag.TRACE).tag(className).build();
     }
 }
