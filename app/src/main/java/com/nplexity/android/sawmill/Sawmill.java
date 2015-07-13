@@ -1,17 +1,30 @@
 package com.nplexity.android.sawmill;
 
+import android.util.*;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class Sawmill {
 
     public enum LogFlag {
-        ERROR,
-        WARNING,
-        INFO,
-        DEBUG,
-        VERBOSE,
-        TRACE
+        ERROR(Log.ERROR),
+        WARNING(Log.WARN),
+        INFO(Log.INFO),
+        DEBUG(Log.DEBUG),
+        VERBOSE(Log.VERBOSE),
+        TRACE(Log.VERBOSE);
+
+        private final int mPriority;
+
+        LogFlag(int priority) {
+            mPriority = priority;
+        }
+
+        public int getPriority() {
+            return mPriority;
+        }
     }
 
     public enum LogLevel {
@@ -89,5 +102,8 @@ public class Sawmill {
                 node.getLogger().logMessage(message);
             }
         }
+    }
+
+    private Sawmill() {
     }
 }
