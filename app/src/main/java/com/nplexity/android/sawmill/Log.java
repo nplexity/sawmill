@@ -49,12 +49,14 @@ public class Log {
         String methodName = elements[2].getMethodName();
         int lineNumber = elements[2].getLineNumber();
 
-        final StringBuilder sb = new StringBuilder("[" + methodName + ":" + lineNumber + "] ");
+        final StringBuilder sb = new StringBuilder();
         for (T obj : args) {
             sb.append(obj);
         }
 
-        return new LogMessage.Builder(sb.toString()).flag(flag).tag(className).build();
+        return new LogMessage.Builder(sb.toString()).flag(flag).tag(className).className(className)
+                                                    .methodName(methodName).lineNumber(lineNumber)
+                                                    .build();
     }
 
     private static <T> LogMessage generateTracerMessage() {
