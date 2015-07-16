@@ -2,7 +2,7 @@
 
 Enhanced logging for Android.
 
-The design of Sawmill was heavily influenced by Robbie Hanson's [CocoaLumberJack](https://github.com/CocoaLumberjack/CocoaLumberjack), so anyone familiar with it should find this easy to understand.
+The design of Sawmill was heavily influenced by Robbie Hanson's [CocoaLumberjack](https://github.com/CocoaLumberjack/CocoaLumberjack), so anyone familiar with it should find this easy to understand.
 
 ## Getting Started
 

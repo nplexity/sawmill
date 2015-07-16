@@ -1,12 +1,15 @@
 package com.nplexity.android.sawmill;
 
-import android.util.*;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class Sawmill {
+
+    // Prevent instantiation
+    private Sawmill() {
+    }
 
     public enum LogFlag {
         ERROR(Log.ERROR),
@@ -102,8 +105,5 @@ public class Sawmill {
                 node.getLogger().logMessage(message);
             }
         }
-    }
-
-    private Sawmill() {
     }
 }
